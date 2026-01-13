@@ -4,8 +4,8 @@
 A_IconTip := "OneNote Focus Timer Running"
 
 ; ===== SETTINGS =====
-beepEveryMs := 5000       ; 5 seconds for testing (set to 900000 for 15 minutes)
-; beepEveryMs := 900000   ; 15 minutes
+; beepEveryMs := 5000       ; 5 seconds for testing (set to 900000 for 15 minutes)
+beepEveryMs := 900000   ; 15 minutes
 
 pollMs := 250             ; how often we check focus (250ms is plenty)
 mode := "pause"           ; "pause" or "reset"
