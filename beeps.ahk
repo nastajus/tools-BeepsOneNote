@@ -3,31 +3,60 @@
 
 A_IconTip := "OneNote Focus Timer Running"
 
-interval_ms := 5000   ; 5 seconds for testing
-; interval_ms := 900000  ; 15 minutes later
+; ===== SETTINGS =====
+beepEveryMs := 5000       ; 5 seconds for testing (set to 900000 for 15 minutes)
+; beepEveryMs := 900000   ; 15 minutes
 
+pollMs := 250             ; how often we check focus (250ms is plenty)
+mode := "pause"           ; "pause" or "reset"
+
+; Your chosen sound:
+beepFreq := 100
+beepDurMs := 1000
+
+; ===== STATE =====
 timerOn := true
-SetTimer(CheckOneNoteAndBeep, interval_ms)
+elapsedMs := 0
+wasFocused := false
 
-CheckOneNoteAndBeep() {
-    if WinActive("ahk_exe ONENOTE.EXE") {
-        SoundBeep(100, 1000)
+SetTimer(Tick, pollMs)
+
+Tick() {
+    global timerOn, elapsedMs, wasFocused
+    global beepEveryMs, mode, beepFreq, beepDurMs
+
+    if !timerOn
+        return
+
+    focused := WinActive("ahk_exe ONENOTE.EXE")
+
+    ; If we just LOST focus:
+    if (wasFocused && !focused) {
+        if (mode = "reset")
+            elapsedMs := 0
     }
+
+    ; Only accumulate time while focused
+    if focused {
+        elapsedMs += pollMs
+        if (elapsedMs >= beepEveryMs) {
+            elapsedMs := 0
+            SoundBeep(beepFreq, beepDurMs)
+        }
+    }
+
+    wasFocused := focused
 }
 
-; Ctrl + Shift + Q toggles the timer
+; Ctrl + Shift + Q toggles the whole system
 ^+q::ToggleTimer()
 
 ToggleTimer() {
-    global timerOn, interval_ms
-
+    global timerOn, elapsedMs
+    timerOn := !timerOn
     if timerOn {
-        SetTimer(CheckOneNoteAndBeep, 0)  ; stop timer
-        timerOn := false
-        TrayTip("OneNote Timer", "Paused", 2)
-    } else {
-        SetTimer(CheckOneNoteAndBeep, interval_ms)  ; restart timer
-        timerOn := true
         TrayTip("OneNote Timer", "Running", 2)
+    } else {
+        TrayTip("OneNote Timer", "Paused (manual)", 2)
     }
 }
