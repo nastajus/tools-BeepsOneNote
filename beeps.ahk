@@ -1,0 +1,33 @@
+#Requires AutoHotkey v2.0
+#SingleInstance Force
+
+A_IconTip := "OneNote Focus Timer Running"
+
+interval_ms := 5000   ; 5 seconds for testing
+; interval_ms := 900000  ; 15 minutes later
+
+timerOn := true
+SetTimer(CheckOneNoteAndBeep, interval_ms)
+
+CheckOneNoteAndBeep() {
+    if WinActive("ahk_exe ONENOTE.EXE") {
+        SoundBeep(100, 1000)
+    }
+}
+
+; Ctrl + Shift + Q toggles the timer
+^+q::ToggleTimer()
+
+ToggleTimer() {
+    global timerOn, interval_ms
+
+    if timerOn {
+        SetTimer(CheckOneNoteAndBeep, 0)  ; stop timer
+        timerOn := false
+        TrayTip("OneNote Timer", "Paused", 2)
+    } else {
+        SetTimer(CheckOneNoteAndBeep, interval_ms)  ; restart timer
+        timerOn := true
+        TrayTip("OneNote Timer", "Running", 2)
+    }
+}
